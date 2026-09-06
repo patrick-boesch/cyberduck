@@ -3,7 +3,7 @@ target
 !.idea/codeStyleSettings.xml
 !.idea/copyright
 *.iml
-xcuserdata/*
+xcuserdata/
 
 # VSCode/Java #
 ###############
@@ -61,3 +61,21 @@ packages/
 
 # Repository-local macOS build caches and Xcode DerivedData
 /.build/
+
+# Xcode output at the project root and in platform/native modules.
+# Keep source build definitions below src/ visible to Git.
+/build/
+/Build/
+/*/build/
+/*/Build/
+/*/*/build/
+/*/*/Build/
+DerivedData/
+ModuleCache.noindex/
+Index.noindex/
+*.app/
+*.dSYM/
+*.xcarchive/
+*.xcresult/
+*.xcactivitylog
+*.xcuserstate
