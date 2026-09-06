@@ -7,10 +7,9 @@
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
-   <LaunchAction buildConfiguration="Release" selectedDebuggerIdentifier="" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.PosixSpawn" launchStyle="0" useCustomWorkingDirectory="YES" customWorkingDirectory="$(PROJECT_DIR)" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="NO" allowLocationSimulation="NO">
-      <PathRunnable runnableDebuggingMode="0" FilePath="$(PROJECT_DIR)/osx/target/Cyberduck.app"/>
-      <MacroExpansion>
-         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="CD0609000000000000000001" BuildableName="Cyberduck Local" BlueprintName="Cyberduck Local" ReferencedContainer="container:Cyberduck.xcodeproj"/>
-      </MacroExpansion>
+   <LaunchAction buildConfiguration="Release" selectedDebuggerIdentifier="" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.PosixSpawn" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="NO" allowLocationSimulation="NO">
+      <BuildableProductRunnable runnableDebuggingMode="0">
+         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="471D2C0B05A2505500675163" BuildableName="Cyberduck.app" BlueprintName="app" ReferencedContainer="container:Cyberduck.xcodeproj"/>
+      </BuildableProductRunnable>
    </LaunchAction>
 </Scheme>

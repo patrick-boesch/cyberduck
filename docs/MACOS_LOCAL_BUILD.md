@@ -21,8 +21,25 @@ package all Java dependencies. The **Cyberduck Local** scheme uses the existing 
 1. Use the existing checkout of this fork and select the branch containing this change. Preserve any local changes.
 2. Open `Cyberduck.xcodeproj` in the existing Xcode installation.
 3. Select **Cyberduck Local** and **My Mac**, then press **⌘B**.
-4. The completed application is `osx/target/Cyberduck.app` inside the checkout. **⌘R** is configured to launch it
-   without attaching LLDB to the Java application.
+4. The completed application is `osx/target/Cyberduck.app` inside the checkout. **⌘R** runs the Maven build and then
+   launches the existing native `app` target's `Cyberduck.app` product without attaching LLDB.
+
+The scheme's Build action selects **Cyberduck Local** (the full Maven pipeline). Its Run action selects the native
+**Cyberduck.app** build product. The app target's output directory is explicitly `$(PROJECT_DIR)/osx/target`, matching
+Maven's bundle location independently of Xcode's DerivedData directory. Xcode resolves the actual
+`Contents/MacOS/Cyberduck` executable through this product and its `CFBundleExecutable` metadata.
+
+The previous launch configuration used a `PathRunnable` string with `$(PROJECT_DIR)` and an aggregate target for macro
+expansion. Xcode reported `IDELaunchErrorDomain Code 9 / Executable Not Found / (null)` with that setup.
+The scheme now uses `BuildableProductRunnable` referencing the native application target directly.
+
+After pulling an update to the shared scheme, use **Product → Scheme → Edit Scheme → Run → Info** to confirm that
+Executable is **Cyberduck.app**. If Xcode still shows a locally overridden executable, select the native
+**Cyberduck.app** product there. Do not add the native `app` target to the scheme's Build action: Maven already builds
+and packages it.
+
+After a successful build, the bundle can also be opened directly with
+`open osx/target/Cyberduck.app` from the checkout root.
 
 The script discovers Maven in the existing PATH and common Homebrew locations. A valid JDK 21 in JAVA_HOME is used;
 an inherited Java 11 or incomplete JDK does not prevent discovery of another JDK. The script next checks
@@ -101,6 +118,10 @@ The JDK-selection regression checks cover an inherited Java 11 with an available
 JDK 21, missing JDKs, strict overrides, missing JNI headers, paths with spaces and Maven exit-status propagation.
 Project parsing checks the aggregate target, its script phase and the JNI header paths. These checks use mocked tools;
 Xcode's indexer and native error presentation still require verification on macOS.
+
+The launch-configuration checks validate the scheme's native product reference, both app configurations' output
+directory, the `CFBundleExecutable` value and preservation of the aggregate-only Build action.
+They are structural checks, not a macOS launch test.
 
 The authoring environment is Linux without Xcode. A complete macOS build and the configured ⌘R launch have **not**
 been verified there.
