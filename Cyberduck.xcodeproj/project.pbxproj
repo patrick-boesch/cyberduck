@@ -2184,22 +2184,19 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
-/* Begin PBXLegacyTarget section */
+/* Begin PBXAggregateTarget section */
 		CD0609000000000000000001 /* Cyberduck Local */ = {
-			isa = PBXLegacyTarget;
-			buildArgumentsString = "\"$(SRCROOT)/scripts/build-macos.sh\" $(ACTION)";
-			buildConfigurationList = CD0609000000000000000002 /* Build configuration list for PBXLegacyTarget "Cyberduck Local" */;
+			isa = PBXAggregateTarget;
+			buildConfigurationList = CD0609000000000000000002 /* Build configuration list for PBXAggregateTarget "Cyberduck Local" */;
 			buildPhases = (
+				CD0609000000000000000004 /* Build macOS app with Maven */,
 			);
-			buildToolPath = /bin/bash;
-			buildWorkingDirectory = "$(SRCROOT)";
 			dependencies = (
 			);
 			name = "Cyberduck Local";
-			passBuildSettingsInEnvironment = 0;
 			productName = "Cyberduck Local";
 		};
-/* End PBXLegacyTarget section */
+/* End PBXAggregateTarget section */
 
 /* Begin PBXNativeTarget section */
 		471D2C0B05A2505500675163 /* app */ = {
@@ -2594,6 +2591,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		CD0609000000000000000004 /* Build macOS app with Maven */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build macOS app with Maven";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "exec /bin/bash \"$SRCROOT/scripts/build-macos.sh\" build\n";
+			showEnvVarsInLog = 0;
+		};
 		4735940F0CE76EE50085DEAC /* Prune NIBs */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -4226,6 +4239,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGNING_ALLOWED = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -4349,6 +4363,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(JAVA_HOME)/include\"/**",
+					"$(PROJECT_DIR)/.build/jdk/include",
+					"$(PROJECT_DIR)/.build/jdk/include/darwin",
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/JavaVM.framework/Headers\"",
 				);
 				SEPARATE_STRIP = YES;
@@ -4495,6 +4511,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(JAVA_HOME)/include\"/**",
+					"$(PROJECT_DIR)/.build/jdk/include",
+					"$(PROJECT_DIR)/.build/jdk/include/darwin",
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/JavaVM.framework/Headers\"",
 				);
 				SEPARATE_STRIP = YES;
@@ -4581,7 +4599,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CD0609000000000000000002 /* Build configuration list for PBXLegacyTarget "Cyberduck Local" */ = {
+		CD0609000000000000000002 /* Build configuration list for PBXAggregateTarget "Cyberduck Local" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CD0609000000000000000003 /* Release */,

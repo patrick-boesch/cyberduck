@@ -35,16 +35,51 @@ command -v xcrun >/dev/null || fail "Xcode command-line tools are missing."
 xcrun --find xcodebuild >/dev/null || fail "Select the existing full Xcode installation in Xcode > Settings > Locations."
 xcrun --sdk macosx --show-sdk-path >/dev/null || fail "The selected Xcode installation has no macOS SDK."
 
-if [[ -z "${JAVA_HOME:-}" ]]; then
-    JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null)" || fail "Install JDK 21 or set JAVA_HOME to an existing JDK 21."
+# An inherited JAVA_HOME (for example Java 11 from Xcode) is only a candidate.
+# Keep an explicit project-specific override strict; otherwise find a complete JDK 21.
+select_jdk21() {
+    local candidate="${1:-}" properties major
+    [[ -n "$candidate" && -x "$candidate/bin/java" && -x "$candidate/bin/javac" ]] || return 1
+    [[ -r "$candidate/include/jni.h" && -r "$candidate/include/darwin/jni_md.h" ]] || return 1
+    candidate="$(cd "$candidate" && pwd -P)" || return 1
+    properties="$("$candidate/bin/java" -XshowSettings:properties -version 2>&1)" || return 1
+    major="$(printf '%s\n' "$properties" | awk '/java.specification.version =/ {print $3; exit}')"
+    [[ "$major" == 21 ]] || return 1
+    JAVA_HOME="$candidate"
+}
+
+inherited_java_home="${JAVA_HOME:-}"
+if [[ -n "${CYBERDUCK_JAVA_HOME:-}" ]]; then
+    select_jdk21 "$CYBERDUCK_JAVA_HOME" ||
+        fail "CYBERDUCK_JAVA_HOME must point to a complete macOS JDK 21 with JNI headers: $CYBERDUCK_JAVA_HOME"
+elif select_jdk21 "$inherited_java_home"; then
+    :
+elif select_jdk21 "$(/usr/libexec/java_home -F -v 21 2>/dev/null || true)"; then
+    :
+else
+    jdk_found=false
+    if command -v brew >/dev/null; then
+        jdk_prefix="$(brew --prefix openjdk@21 2>/dev/null || true)"
+        if [[ -n "$jdk_prefix" ]] && select_jdk21 "$jdk_prefix/libexec/openjdk.jdk/Contents/Home"; then
+            jdk_found=true
+        fi
+    fi
+    if [[ "$jdk_found" == false ]]; then
+        for candidate in \
+            /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
+            /usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home; do
+            if select_jdk21 "$candidate"; then
+                jdk_found=true
+                break
+            fi
+        done
+    fi
+    [[ "$jdk_found" == true ]] ||
+        fail "No complete macOS JDK 21 found. Inherited JAVA_HOME: ${inherited_java_home:-unset}. Install JDK 21 (for example: brew install openjdk@21), or set CYBERDUCK_JAVA_HOME to an existing macOS JDK 21 with JNI headers."
 fi
-[[ -x "$JAVA_HOME/bin/java" && -x "$JAVA_HOME/bin/javac" ]] || fail "JAVA_HOME must point to a full JDK 21."
-java_version="$("$JAVA_HOME/bin/java" -XshowSettings:properties -version 2>&1)"
-java_major="$(printf '%s\n' "$java_version" | awk '/java.specification.version =/ {print $3; exit}')"
-[[ "$java_major" == 21 ]] || fail "JDK 21 is required; JAVA_HOME reports Java $java_major."
-[[ -r "$JAVA_HOME/include/jni.h" && -r "$JAVA_HOME/include/darwin/jni_md.h" ]] ||
-    fail "macOS JNI headers are missing in $JAVA_HOME/include. Use a complete macOS JDK 21."
 export JAVA_HOME
+export PATH="$JAVA_HOME/bin:$PATH"
+printf 'Using JDK 21: %s\n' "$JAVA_HOME"
 
 if [[ "$action" == --check ]]; then
     printf 'Prerequisites found. Repository: %s\n' "$repo_root"
@@ -54,6 +89,10 @@ fi
 
 # Keep caches outside target/: Maven clean removes the reactor's target folders.
 mkdir -p "$repo_root/.build/maven-repository" "$repo_root/.build/tmp"
+# Give Xcode's indexer a stable header path without modifying system Java settings.
+jdk_link="$repo_root/.build/jdk"
+[[ ! -e "$jdk_link" || -L "$jdk_link" ]] || fail "Expected a symlink at $jdk_link."
+ln -sfn "$JAVA_HOME" "$jdk_link"
 export TMPDIR="$repo_root/.build/tmp/"
 maven_args=(
     --batch-mode --no-transfer-progress

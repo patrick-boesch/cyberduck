@@ -24,10 +24,30 @@ package all Java dependencies. The **Cyberduck Local** scheme uses the existing 
 4. The completed application is `osx/target/Cyberduck.app` inside the checkout. **⌘R** is configured to launch it
    without attaching LLDB to the Java application.
 
-The script discovers Maven in the existing PATH and common Homebrew locations. It discovers JDK 21 through
-`/usr/libexec/java_home` if JAVA_HOME is unset. Set JAVA_HOME explicitly for an unregistered JDK. It does not install
-tools or change the active Xcode installation. Preflight also checks `include/jni.h` and
-`include/darwin/jni_md.h` in the selected JDK before Maven starts.
+The script discovers Maven in the existing PATH and common Homebrew locations. A valid JDK 21 in JAVA_HOME is used;
+an inherited Java 11 or incomplete JDK does not prevent discovery of another JDK. The script next checks
+`/usr/libexec/java_home -F -v 21`, `brew --prefix openjdk@21`, and standard Apple Silicon/Intel Homebrew locations.
+Every candidate must report Java 21 and contain `javac`, `include/jni.h` and `include/darwin/jni_md.h`.
+The selected JDK is printed and exported to Maven, which passes it to the native Xcode builds.
+
+Set `CYBERDUCK_JAVA_HOME` to explicitly select an unregistered JDK. This override is strict: an invalid override
+stops the build with its path in the error message. No global Java configuration is changed.
+
+If no JDK 21 is installed, install one before building. With Homebrew:
+
+```sh
+brew install openjdk@21
+bash scripts/build-macos.sh --check
+```
+
+The build can discover the Homebrew JDK directly; system-wide symlink registration is unnecessary.
+See the [Homebrew formula](https://formulae.brew.sh/formula/openjdk@21) for installation details.
+The script does not install tools or change the active Xcode installation.
+
+The shared scheme uses a standard aggregate target with a script build phase, replacing the legacy external target
+that reported an internal Xcode consistency error when preflight failed. The script exits with the actual build error.
+A successful build setup creates `.build/jdk` pointing to the selected JDK. Xcode's native header search paths include
+that location so its indexer can resolve JNI headers even when Xcode itself has no matching JAVA_HOME.
 
 The first build downloads many dependencies and a bundled runtime; later builds reuse the project-local Maven cache.
 Builds skip tests, signing and installers. The scheme is for local development, not distribution or notarization.
@@ -54,6 +74,7 @@ is requested. The script returns a failed Maven build's exit status and does not
 | Maven module outputs | Each module's `target/` |
 | Maven dependency cache | `.build/maven-repository/` |
 | Build temporary files | `.build/tmp/` |
+| Selected JDK link for Xcode header lookup | `.build/jdk` |
 | Xcode scheme products/intermediates | `.build/xcode/Products/`, `.build/xcode/Intermediates/` |
 | Xcode DerivedData | `.build/xcode/DerivedData/` |
 | Native Maven-invoked Xcode intermediates/caches | `core/dylib/target/xcode/`, `osx/target/xcode/` |
@@ -63,8 +84,9 @@ database locks. Shared workspace settings keep Xcode's output in the checkout; e
 can override shared settings. If necessary, select the shared project-relative locations in File → Project Settings.
 Installed tools and their own installation data remain outside the checkout.
 
-Product → Clean Build Folder, or `bash scripts/build-macos.sh clean`, runs Maven clean on the selected reactor.
-The reusable `.build/` caches are retained. Build output is ignored by Git.
+Product → Clean Build Folder clears the outer Xcode build data. To clean the Maven reactor and packaged app,
+run `bash scripts/build-macos.sh clean`. The reusable `.build/` caches and JDK link are retained.
+Build output is ignored by Git.
 
 ## Verification
 
@@ -74,6 +96,11 @@ unsupported JDK/OS and invalid actions). These checks do not compile Java or nat
 
 Follow-up verification covers the reported missing-Ant failure: preflight and the build wrapper succeed with no
 standalone Ant on PATH, and missing macOS JNI headers produce a specific error before Maven starts.
+
+The JDK-selection regression checks cover an inherited Java 11 with an available Homebrew JDK 21, a valid inherited
+JDK 21, missing JDKs, strict overrides, missing JNI headers, paths with spaces and Maven exit-status propagation.
+Project parsing checks the aggregate target, its script phase and the JNI header paths. These checks use mocked tools;
+Xcode's indexer and native error presentation still require verification on macOS.
 
 The authoring environment is Linux without Xcode. A complete macOS build and the configured ⌘R launch have **not**
 been verified there.
