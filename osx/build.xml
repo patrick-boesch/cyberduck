@@ -39,7 +39,7 @@
     </condition>
 
     <property name="build.xcodeoptions.default"
-              value="CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO JVM_RUNTIME_ARGS='${jvm.runtime.debug}${jvm.runtime.args}' JAVA_HOME=${java.home} SYMROOT=${build} SDKROOT=macosx ARCHS=${app.runtime.archs} MACOSX_DEPLOYMENT_TARGET=${app.runtime.system.min}"/>
+              value="CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO JVM_RUNTIME_ARGS='${jvm.runtime.debug}${jvm.runtime.args}' JAVA_HOME='${java.home}' SYMROOT='${build}' OBJROOT='${build}/xcode/Intermediates' CLANG_MODULE_CACHE_PATH='${build}/xcode/ModuleCache.noindex' SWIFT_MODULE_CACHE_PATH='${build}/xcode/ModuleCache.noindex' SDKROOT=macosx ARCHS=${app.runtime.archs} MACOSX_DEPLOYMENT_TARGET=${app.runtime.system.min}"/>
 
     <condition property="build.xcodeoptions"
                value="${build.xcodeoptions.default} SPARKLEFEED='https://version.cyberduck.io/${sparkle.feed}/changelog.rss' INFOPLIST_PREPROCESSOR_DEFINITIONS=SPARKLE_BUILD"
@@ -80,10 +80,10 @@
         <echo message="Building ${app.bundle} with configuration ${xcode.configuration}"/>
         <local name="build.settings"/>
         <property name="build.settings"
-                  value="${build.xcodeoptions} RUNTIME_SOURCE=${runtime.dependency} VERSION=${version} REVISION=${revision} COPYRIGHT='${copyright}'"/>
+                  value="${build.xcodeoptions} RUNTIME_SOURCE='${runtime.dependency}' VERSION=${version} REVISION=${revision} COPYRIGHT='${copyright}'"/>
         <echo message="Build settings ${build.settings}"/>
         <exec dir="${home}" executable="/usr/bin/xcrun" spawn="false" failonerror="true">
-            <arg line="xcodebuild -project ${home}/'Cyberduck.xcodeproj' -configuration '${xcode.configuration}' -target '${xcode.target}' ${build.settings}"/>
+            <arg line="xcodebuild -project '${home}/Cyberduck.xcodeproj' -configuration '${xcode.configuration}' -target '${xcode.target}' ${build.settings}"/>
         </exec>
         <antcall target="runtime">
             <param name="bundle" value="${app.bundle}"/>

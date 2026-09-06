@@ -150,6 +150,10 @@ Run with `-Pinstaller` to build installer packages with build artifacts
 
 ### macOS
 
+For this fork, open `Cyberduck.xcodeproj`, select the shared **Cyberduck Local** scheme, and build with ⌘B.
+The scheme runs the complete Maven build with JDK 21 and keeps build output inside the checkout.
+See [Local macOS builds](docs/MACOS_LOCAL_BUILD.md) for prerequisites, paths and verification.
+
 Active the sandboxing profile with `-Psandbox` to apply sandbox entitlements `com.apple.security.app-sandbox`.
 
 ### Windows

@@ -2184,6 +2184,23 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
+/* Begin PBXLegacyTarget section */
+		CD0609000000000000000001 /* Cyberduck Local */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "\"$(SRCROOT)/scripts/build-macos.sh\" $(ACTION)";
+			buildConfigurationList = CD0609000000000000000002 /* Build configuration list for PBXLegacyTarget "Cyberduck Local" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/bash;
+			buildWorkingDirectory = "$(SRCROOT)";
+			dependencies = (
+			);
+			name = "Cyberduck Local";
+			passBuildSettingsInEnvironment = 0;
+			productName = "Cyberduck Local";
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		471D2C0B05A2505500675163 /* app */ = {
 			isa = PBXNativeTarget;
@@ -2343,6 +2360,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				CD0609000000000000000001 /* Cyberduck Local */,
 				471D2C0B05A2505500675163 /* app */,
 				4739EF670856981300405FD3 /* libcore */,
 				47C2AD7F1A268C880047B67A /* cli */,
@@ -4204,6 +4222,15 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		CD0609000000000000000003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
+		};
 		4739EF720856981300405FD3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4554,6 +4581,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		CD0609000000000000000002 /* Build configuration list for PBXLegacyTarget "Cyberduck Local" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD0609000000000000000003 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4739EF710856981300405FD3 /* Build configuration list for PBXNativeTarget "libcore" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

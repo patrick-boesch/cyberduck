@@ -58,3 +58,6 @@ Thumbs.db
 obj/
 
 packages/
+
+# Repository-local macOS build caches and Xcode DerivedData
+/.build/

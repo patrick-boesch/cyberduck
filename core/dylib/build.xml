@@ -26,7 +26,7 @@
     <property name="app.runtime.archs" value="'x86_64 arm64'"/>
     <property name="app.runtime.system.min" value="10.13"/>
     <property name="build.xcodeoptions"
-              value="CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO JAVA_HOME=${java.home} OTHER_LDFLAGS=-headerpad_max_install_names SYMROOT=${build} SDKROOT=macosx ARCHS=${app.runtime.archs} MACOSX_DEPLOYMENT_TARGET=${app.runtime.system.min}"/>
+              value="CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO JAVA_HOME='${java.home}' OTHER_LDFLAGS=-headerpad_max_install_names SYMROOT='${build}' OBJROOT='${build}/xcode/Intermediates' CLANG_MODULE_CACHE_PATH='${build}/xcode/ModuleCache.noindex' SWIFT_MODULE_CACHE_PATH='${build}/xcode/ModuleCache.noindex' SDKROOT=macosx ARCHS=${app.runtime.archs} MACOSX_DEPLOYMENT_TARGET=${app.runtime.system.min}"/>
 
     <property name="xcode.configuration" value="Release"/>
     <property name="xcode.target" value="libcore"/>
@@ -37,7 +37,7 @@
                   value="${build.xcodeoptions} VERSION=${version} REVISION=${revision} COPYRIGHT='${copyright}'"/>
         <echo message="Build settings ${build.settings}"/>
         <exec dir="${home}" executable="/usr/bin/xcrun" spawn="false" failonerror="true">
-            <arg line="xcodebuild -project ${home}/'Cyberduck.xcodeproj' -configuration '${xcode.configuration}' -target '${xcode.target}' ${build.settings}"/>
+            <arg line="xcodebuild -project '${home}/Cyberduck.xcodeproj' -configuration '${xcode.configuration}' -target '${xcode.target}' ${build.settings}"/>
         </exec>
     </target>
 
