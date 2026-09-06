@@ -518,6 +518,7 @@
 		47181E9E0E17D1E500568D80 /* el */ = {isa = PBXFileReference; fileEncoding = 2483028224; lastKnownFileType = text.plist.strings; lineEnding = 0; name = el; path = i18n/src/main/resources/el.lproj/Configuration.strings; sourceTree = "<group>"; };
 		47181E9F0E17D1E500568D80 /* el */ = {isa = PBXFileReference; lastKnownFileType = text; name = el; path = i18n/src/main/resources/el.lproj/License.txt; sourceTree = "<group>"; };
 		471D2C5505A2505600675163 /* Cyberduck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cyberduck.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD0609000000000000000005 /* Cyberduck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cyberduck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		471DF14F167F2A7B00EAFE71 /* cyberduck-document.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "cyberduck-document.icns"; sourceTree = "<group>"; };
 		471F5C0D12AD1B6B0005D323 /* pt_PT */ = {isa = PBXFileReference; fileEncoding = 2483028224; lastKnownFileType = text.plist.strings; lineEnding = 0; name = pt_PT; path = i18n/src/main/resources/pt_PT.lproj/Alert.strings; sourceTree = "<group>"; };
 		471F5C0E12AD1B6B0005D323 /* ja */ = {isa = PBXFileReference; fileEncoding = 2483028224; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = i18n/src/main/resources/ja.lproj/Alert.strings; sourceTree = "<group>"; };
@@ -1843,6 +1844,7 @@
 			isa = PBXGroup;
 			children = (
 				471D2C5505A2505600675163 /* Cyberduck.app */,
+				CD0609000000000000000005 /* Cyberduck.app */,
 				4739EF730856981400405FD3 /* libcore.dylib */,
 				47C2AD801A268C880047B67A /* duck.bundle */,
 				47D9E2832DF9B98C0088B042 /* Cyberduck Dock Plugin.docktileplugin */,
@@ -2184,21 +2186,20 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
-/* Begin PBXAggregateTarget section */
+/* Begin PBXNativeTarget section */
 		CD0609000000000000000001 /* Cyberduck Local */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = CD0609000000000000000002 /* Build configuration list for PBXAggregateTarget "Cyberduck Local" */;
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD0609000000000000000002 /* Build configuration list for PBXNativeTarget "Cyberduck Local" */;
 			buildPhases = (
 				CD0609000000000000000004 /* Build macOS app with Maven */,
 			);
 			dependencies = (
 			);
 			name = "Cyberduck Local";
-			productName = "Cyberduck Local";
+			productName = Cyberduck;
+			productReference = CD0609000000000000000005 /* Cyberduck.app */;
+			productType = "com.apple.product-type.application";
 		};
-/* End PBXAggregateTarget section */
-
-/* Begin PBXNativeTarget section */
 		471D2C0B05A2505500675163 /* app */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 47D286C50855740C008142CF /* Build configuration list for PBXNativeTarget "app" */;
@@ -4239,7 +4240,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGNING_ALLOWED = NO;
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/osx/target";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_NAME = Cyberduck;
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -4601,7 +4605,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CD0609000000000000000002 /* Build configuration list for PBXAggregateTarget "Cyberduck Local" */ = {
+		CD0609000000000000000002 /* Build configuration list for PBXNativeTarget "Cyberduck Local" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CD0609000000000000000003 /* Release */,

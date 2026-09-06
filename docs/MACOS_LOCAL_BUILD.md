@@ -22,21 +22,28 @@ package all Java dependencies. The **Cyberduck Local** scheme uses the existing 
 2. Open `Cyberduck.xcodeproj` in the existing Xcode installation.
 3. Select **Cyberduck Local** and **My Mac**, then press **⌘B**.
 4. The completed application is `osx/target/Cyberduck.app` inside the checkout. **⌘R** runs the Maven build and then
-   launches the existing native `app` target's `Cyberduck.app` product without attaching LLDB.
+   launches the **Cyberduck Local** target's `Cyberduck.app` product without attaching LLDB.
 
-The scheme's Build action selects **Cyberduck Local** (the full Maven pipeline). Its Run action selects the native
-**Cyberduck.app** build product. The app target's output directory is explicitly `$(PROJECT_DIR)/osx/target`, matching
-Maven's bundle location independently of Xcode's DerivedData directory. Xcode resolves the actual
-`Contents/MacOS/Cyberduck` executable through this product and its `CFBundleExecutable` metadata.
+The scheme's Build and Run actions select the same **Cyberduck Local** application target. Its only build phase runs
+the full Maven pipeline, which invokes the original native `app` target internally. The local target neither generates
+an Info.plist nor signs the result. Its output directory is `$(PROJECT_DIR)/osx/target`, matching Maven's bundle
+location independently of Xcode's DerivedData directory. Xcode resolves `Contents/MacOS/Cyberduck` through this
+product and its `CFBundleExecutable` metadata.
 
 The previous launch configuration used a `PathRunnable` string with `$(PROJECT_DIR)` and an aggregate target for macro
 expansion. Xcode reported `IDELaunchErrorDomain Code 9 / Executable Not Found / (null)` with that setup.
-The scheme now uses `BuildableProductRunnable` referencing the native application target directly.
+The scheme uses `BuildableProductRunnable` referencing the local application target directly.
+
+Referencing the original native `app` target as the runnable causes Xcode to build it again after Maven, even with
+implicit dependencies disabled and its Build action checkboxes cleared. That second build lacks Maven's JVM and
+version settings and overwrites the packaged Info.plist: `VMOptions` becomes the literal `$JVM_RUNTIME_ARGS`, causing
+Java to exit with `ClassNotFoundException: $JVM_RUNTIME_ARGS`. Keeping Build and Run on the local application target
+prevents that second build.
 
 After pulling an update to the shared scheme, use **Product → Scheme → Edit Scheme → Run → Info** to confirm that
 Executable is **Cyberduck.app**. If Xcode still shows a locally overridden executable, select the native
-**Cyberduck.app** product there. Do not add the native `app` target to the scheme's Build action: Maven already builds
-and packages it.
+**Cyberduck.app** product belonging to **Cyberduck Local** there. Do not select the original native `app` target for
+Build or Run: Maven already builds and packages it.
 
 After a successful build, the bundle can also be opened directly with
 `open osx/target/Cyberduck.app` from the checkout root.
@@ -61,7 +68,7 @@ The build can discover the Homebrew JDK directly; system-wide symlink registrati
 See the [Homebrew formula](https://formulae.brew.sh/formula/openjdk@21) for installation details.
 The script does not install tools or change the active Xcode installation.
 
-The shared scheme uses a standard aggregate target with a script build phase, replacing the legacy external target
+The shared scheme uses an application target with a script build phase, replacing the legacy external target
 that reported an internal Xcode consistency error when preflight failed. The script exits with the actual build error.
 A successful build setup creates `.build/jdk` pointing to the selected JDK. Xcode's native header search paths include
 that location so its indexer can resolve JNI headers even when Xcode itself has no matching JAVA_HOME.
@@ -107,7 +114,7 @@ Build output is ignored by Git.
 
 ## Verification
 
-Completed checks: Bash syntax; OpenStep project parsing and existing-target preservation; XML/plist parsing;
+Initial checks: Bash syntax; OpenStep project parsing and existing-target preservation; XML/plist parsing;
 and seven build-script cases using mocked macOS tools (preflight, paths with spaces, failure propagation, clean,
 unsupported JDK/OS and invalid actions). These checks do not compile Java or native code.
 
@@ -116,15 +123,22 @@ standalone Ant on PATH, and missing macOS JNI headers produce a specific error b
 
 The JDK-selection regression checks cover an inherited Java 11 with an available Homebrew JDK 21, a valid inherited
 JDK 21, missing JDKs, strict overrides, missing JNI headers, paths with spaces and Maven exit-status propagation.
-Project parsing checks the aggregate target, its script phase and the JNI header paths. These checks use mocked tools;
+The initial project checks covered the aggregate target, its script phase and the JNI header paths using mocked tools;
 Xcode's indexer and native error presentation still require verification on macOS.
 
-The launch-configuration checks validate the scheme's native product reference, both app configurations' output
-directory, the `CFBundleExecutable` value and preservation of the aggregate-only Build action.
-They are structural checks, not a macOS launch test.
+The initial launch-configuration checks covered the native product reference, app output directories and
+`CFBundleExecutable`. Those structural checks did not catch Xcode's second native build.
 
-The authoring environment is Linux without Xcode. A complete macOS build and the configured ⌘R launch have **not**
-been verified there.
+The startup correction was verified on Apple Silicon with macOS 26.6.2 and Xcode 26.6: the local scheme build succeeds
+and its outer dependency graph contains only `Cyberduck Local`. The final bundle retains Maven's VM options and
+version metadata. A direct release launch remains running after 20 seconds; a native sample confirms ARM64 execution,
+the embedded JVM and the `NSApplication` event loop. The diagnostic process was then deliberately terminated.
+Existing scheme customizations and the original native targets were checked for preservation. No full test suite ran.
+
+`codesign --verify` still reports missing or invalid signatures with `-DskipSign`; signing was not changed because
+the observed direct start succeeds with those signatures. The local build also logs a Sparkle updater EdDSA-key error
+without terminating the application. Visible UI, double-click and Xcode's Run action remain manual checks.
+Startup and build diagnostics are saved under `osx/target/startup-diagnosis/` in the diagnosing checkout.
 
 On the Mac, perform one build without signing and then these short manual checks:
 
