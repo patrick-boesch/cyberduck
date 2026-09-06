@@ -8,8 +8,10 @@ the underlying cause of the original crash without a macOS crash report or a rep
 ## Prerequisites
 
 - An existing full Xcode installation, selected under Xcode → Settings → Locations → Command Line Tools.
-- JDK 21, Apache Maven 3.5 or newer, and Apache Ant 1.10.1 or newer.
+- A complete macOS JDK 21 (including JNI headers) and Apache Maven 3.5 or newer.
 - Network access for Maven dependencies, including the upstream Cyberduck artifacts and bundled Java runtime.
+
+Ant is supplied by the repository's `maven-antrun-plugin`; this build does not need a separate `ant` executable.
 
 The repository builds Java code plus native Cocoa components. The native `app` target alone does not build and
 package all Java dependencies. The **Cyberduck Local** scheme uses the existing Maven/Ant pipeline for the complete app.
@@ -22,9 +24,10 @@ package all Java dependencies. The **Cyberduck Local** scheme uses the existing 
 4. The completed application is `osx/target/Cyberduck.app` inside the checkout. **⌘R** is configured to launch it
    without attaching LLDB to the Java application.
 
-The script discovers Maven/Ant in the existing PATH and common Homebrew locations. It discovers JDK 21 through
+The script discovers Maven in the existing PATH and common Homebrew locations. It discovers JDK 21 through
 `/usr/libexec/java_home` if JAVA_HOME is unset. Set JAVA_HOME explicitly for an unregistered JDK. It does not install
-tools or change the active Xcode installation.
+tools or change the active Xcode installation. Preflight also checks `include/jni.h` and
+`include/darwin/jni_md.h` in the selected JDK before Maven starts.
 
 The first build downloads many dependencies and a bundled runtime; later builds reuse the project-local Maven cache.
 Builds skip tests, signing and installers. The scheme is for local development, not distribution or notarization.
@@ -68,6 +71,9 @@ The reusable `.build/` caches are retained. Build output is ignored by Git.
 Completed checks: Bash syntax; OpenStep project parsing and existing-target preservation; XML/plist parsing;
 and seven build-script cases using mocked macOS tools (preflight, paths with spaces, failure propagation, clean,
 unsupported JDK/OS and invalid actions). These checks do not compile Java or native code.
+
+Follow-up verification covers the reported missing-Ant failure: preflight and the build wrapper succeed with no
+standalone Ant on PATH, and missing macOS JNI headers produce a specific error before Maven starts.
 
 The authoring environment is Linux without Xcode. A complete macOS build and the configured ⌘R launch have **not**
 been verified there.

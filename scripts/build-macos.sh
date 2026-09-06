@@ -30,7 +30,7 @@ cd "$repo_root"
 # Xcode launched from Finder does not inherit a login shell's Homebrew PATH.
 export PATH="${PATH:-/usr/bin:/bin:/usr/sbin:/sbin}:/opt/homebrew/bin:/usr/local/bin"
 command -v mvn >/dev/null || fail "Apache Maven is missing. Install Maven and retry."
-command -v ant >/dev/null || fail "Apache Ant is missing. Install Ant 1.10.1 or newer and retry."
+# Ant runs inside maven-antrun-plugin; no standalone ant executable is needed.
 command -v xcrun >/dev/null || fail "Xcode command-line tools are missing."
 xcrun --find xcodebuild >/dev/null || fail "Select the existing full Xcode installation in Xcode > Settings > Locations."
 xcrun --sdk macosx --show-sdk-path >/dev/null || fail "The selected Xcode installation has no macOS SDK."
@@ -42,11 +42,13 @@ fi
 java_version="$("$JAVA_HOME/bin/java" -XshowSettings:properties -version 2>&1)"
 java_major="$(printf '%s\n' "$java_version" | awk '/java.specification.version =/ {print $3; exit}')"
 [[ "$java_major" == 21 ]] || fail "JDK 21 is required; JAVA_HOME reports Java $java_major."
+[[ -r "$JAVA_HOME/include/jni.h" && -r "$JAVA_HOME/include/darwin/jni_md.h" ]] ||
+    fail "macOS JNI headers are missing in $JAVA_HOME/include. Use a complete macOS JDK 21."
 export JAVA_HOME
 
 if [[ "$action" == --check ]]; then
     printf 'Prerequisites found. Repository: %s\n' "$repo_root"
-    printf 'JDK: %s\nMaven: %s\nAnt: %s\n' "$JAVA_HOME" "$(command -v mvn)" "$(command -v ant)"
+    printf 'JDK: %s\nMaven: %s\n' "$JAVA_HOME" "$(command -v mvn)"
     exit 0
 fi
 
